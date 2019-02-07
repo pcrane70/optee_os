@@ -22,6 +22,7 @@
 
 #define GICC_CTLR_ENABLEGRP0	(1 << 0)
 #define GICC_CTLR_ENABLEGRP1	(1 << 1)
+#define GICC_CTLR_ENABLEGRP1S	(1 << 2)
 #define GICC_CTLR_FIQEN		(1 << 3)
 
 /* Offsets from gic.gicd_base */
@@ -34,10 +35,12 @@
 #define GICD_ICPENDR(n)		(0x280 + (n) * 4)
 #define GICD_IPRIORITYR(n)	(0x400 + (n) * 4)
 #define GICD_ITARGETSR(n)	(0x800 + (n) * 4)
+#define GICD_IGROUPMODR(n)	(0xd00 + (n) * 4)
 #define GICD_SGIR		(0xF00)
 
 #define GICD_CTLR_ENABLEGRP0	(1 << 0)
 #define GICD_CTLR_ENABLEGRP1	(1 << 1)
+#define GICD_CTLR_ENABLEGRP1S	(1 << 2)
 
 /* Number of Private Peripheral Interrupt */
 #define NUM_PPI	32
@@ -148,6 +151,8 @@ void gic_cpu_init(struct gic_data *gd)
 #if defined(CFG_ARM_GICV3)
 	write_icc_pmr(0x80);
 	write_icc_ctlr(GICC_CTLR_ENABLEGRP0 | GICC_CTLR_ENABLEGRP1 |
+		       GICC_CTLR_ENABLEGRP1S |
+		       GICC_CTLR_IRQEN |
 		       GICC_CTLR_FIQEN);
 #else
 	write32(0x80, gd->gicc_base + GICC_PMR);
@@ -191,16 +196,24 @@ void gic_init(struct gic_data *gd, vaddr_t gicc_base __maybe_unused,
 #if defined(CFG_ARM_GICV3)
 	write_icc_pmr(0x80);
 	write_icc_ctlr(GICC_CTLR_ENABLEGRP0 | GICC_CTLR_ENABLEGRP1 |
+		       GICC_CTLR_ENABLEGRP1S |
+		       GICC_CTLR_IRQEN |
 		       GICC_CTLR_FIQEN);
+
+	write32(read32(gd->gicd_base + GICD_CTLR) | GICD_CTLR_ENABLEGRP0 |
+		GICD_CTLR_ENABLEGRP1 | GICD_CTLR_ENABLEGRP1S,
+		gd->gicd_base + GICD_CTLR);
+
 #else
 	write32(0x80, gd->gicc_base + GICC_PMR);
 
 	/* Enable GIC */
 	write32(GICC_CTLR_ENABLEGRP0 | GICC_CTLR_ENABLEGRP1 | GICC_CTLR_FIQEN,
 		gd->gicc_base + GICC_CTLR);
-#endif
+
 	write32(read32(gd->gicd_base + GICD_CTLR) | GICD_CTLR_ENABLEGRP0 |
 		GICD_CTLR_ENABLEGRP1, gd->gicd_base + GICD_CTLR);
+#endif
 }
 
 void gic_init_base_addr(struct gic_data *gd, vaddr_t gicc_base __maybe_unused,
@@ -221,9 +234,17 @@ static void gic_it_add(struct gic_data *gd, size_t it)
 	write32(mask, gd->gicd_base + GICD_ICENABLER(idx));
 	/* Make it non-pending */
 	write32(mask, gd->gicd_base + GICD_ICPENDR(idx));
+#if defined(CFG_ARM_GICV3)
+	/* Assign it to group1S */
+	write32(read32(gd->gicd_base + GICD_IGROUPR(idx)) & ~mask,
+			gd->gicd_base + GICD_IGROUPR(idx));
+	write32(read32(gd->gicd_base + GICD_IGROUPMODR(idx)) | mask,
+			gd->gicd_base + GICD_IGROUPMODR(idx));
+#else
 	/* Assign it to group0 */
 	write32(read32(gd->gicd_base + GICD_IGROUPR(idx)) & ~mask,
 			gd->gicd_base + GICD_IGROUPR(idx));
+#endif
 }
 
 static void gic_it_set_cpu_mask(struct gic_data *gd, size_t it,
