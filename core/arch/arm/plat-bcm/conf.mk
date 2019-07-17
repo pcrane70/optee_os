@@ -26,6 +26,8 @@ $(call force,CFG_PL022,y)
 $(call force,CFG_BCM_HWRNG,y)
 $(call force,CFG_BCM_SOTP,y)
 $(call force,CFG_BCM_GPIO,y)
+# BNXT fw load application
+$(call force,CFG_BNXT_FW,y)
 endif
 
 ifeq ($(DEBUG),1)

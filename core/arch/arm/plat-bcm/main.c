@@ -54,6 +54,18 @@ register_dynamic_shm(BCM_DRAM1_NS_BASE, BCM_DRAM1_NS_SIZE);
 #ifdef BCM_DRAM2_NS_BASE
 register_dynamic_shm(BCM_DRAM2_NS_BASE, BCM_DRAM2_NS_SIZE);
 #endif
+#ifdef BCM_DRAM0_SEC_BASE
+register_phys_mem(MEM_AREA_RAM_SEC, BCM_DRAM0_SEC_BASE, BCM_DRAM0_SEC_SIZE);
+#endif
+#ifdef BCM_DRAM1_SEC_BASE
+register_phys_mem(MEM_AREA_RAM_SEC, BCM_DRAM1_SEC_BASE, BCM_DRAM1_SEC_SIZE);
+#endif
+#ifdef BCM_DEVICE4_BASE
+register_phys_mem_pgdir(MEM_AREA_IO_SEC, BCM_DEVICE4_BASE, BCM_DEVICE4_SIZE);
+#endif
+#ifdef BCM_DEVICE5_BASE
+register_phys_mem_pgdir(MEM_AREA_IO_NSEC, BCM_DEVICE5_BASE, BCM_DEVICE5_SIZE);
+#endif
 
 const struct thread_handlers *generic_boot_get_handlers(void)
 {

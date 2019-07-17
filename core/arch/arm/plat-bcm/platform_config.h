@@ -42,10 +42,25 @@
 
 /* NS DDR ranges */
 #define BCM_DRAM0_NS_BASE      0x80000000
-#define BCM_DRAM0_NS_SIZE      0x0d000000
+#define BCM_DRAM0_NS_SIZE      0xae00000
 #define BCM_DRAM1_NS_BASE      0x90000000
 #define BCM_DRAM1_NS_SIZE      0x70000000
 #define BCM_DRAM2_NS_BASE      0x880400000
 #define BCM_DRAM2_NS_SIZE      0x17fbfffff
+
+/* used for bnxt crash dump */
+#define BCM_DRAM0_SEC_BASE     0x8b000000
+#define BCM_DRAM0_SEC_SIZE     0x2000000
+/* used for bnxt fw */
+#define BCM_DRAM1_SEC_BASE     0x8ae00000
+#define BCM_DRAM1_SEC_SIZE     0x200000
+
+#define BNXT_BASE		0x60800000
+#define BCM_DEVICE4_BASE	BNXT_BASE
+#define BCM_DEVICE4_SIZE	0x800000
+
+#define QSPI_MEM_BASE		0x70000000
+#define BCM_DEVICE5_BASE	QSPI_MEM_BASE
+#define BCM_DEVICE5_SIZE	0x800000
 
 #endif /*PLATFORM_CONFIG_H*/
